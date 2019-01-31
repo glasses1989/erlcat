@@ -1,5 +1,5 @@
 {application, erlcat,
- [{description, "An OTP library"},
+ [{description, "A cat client for erlang."},
   {vsn, "0.1.0"},
   {registered, []},
   {applications,
@@ -9,7 +9,7 @@
   {env,[]},
   {modules, []},
 
-  {maintainers, []},
-  {licenses, ["Apache 2.0"]},
-  {links, []}
+  {maintainers, ["Zengxiantao", "DLive"]},
+  {licenses, ["BSD", "MIT"]},
+  {links, [{"Github", "https://github.com/sadsnoopy1989/erlcat"}]}
  ]}.
