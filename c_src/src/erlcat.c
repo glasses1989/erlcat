@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "cat/client.h"
+#include "../include/client.h"
 #include "erl_nif.h"
 
 #define MAXKEYLEN 128
