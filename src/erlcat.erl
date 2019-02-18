@@ -2,6 +2,7 @@
 
 -export([init/0, cat_client_init/1, cat_version/0, is_cat_enabled/0, cat_client_destroy/0, create_message_id/0, log_event/4, log_error/2, log_metric_for_count/2, log_metric_for_duration/2, log_metric_for_sum/2, log_transaction_with_duration/3]).
 
+-export([new_transaction/2,complete/1]).
 -on_load(init/0).
 
 -define(APPNAME, erlcat).
@@ -62,6 +63,24 @@ log_metric_for_sum(_Name, _Value) ->
     ?NOT_LOADED.
 
 %% === Transaction Apis ===
-
+new_transaction(Name,Type) ->
+	?NOT_LOADED.
+set_status(CatTransaction,State)->
+	?NOT_LOADED.
+complete(CatTransaction)->
+	?NOT_LOADED.
+set_timestamp(CatTransaction,Timestamp)->
+	?NOT_LOADED.
+set_duration_start(CatTransaction,Timestamp)->
+	?NOT_LOADED.
+set_duration_in_millis(CatTransaction,DurationTime)->
+	?NOT_LOADED.
+add_data(CatTransaction,Data)->
+	?NOT_LOADED.
+add_kv(CatTransaction,Key,Value)->
+	?NOT_LOADED.
+new_transaction_with_duration()->
+	?NOT_LOADED.
 log_transaction_with_duration(_Type, _Name, _Duration) ->
     ?NOT_LOADED.
+

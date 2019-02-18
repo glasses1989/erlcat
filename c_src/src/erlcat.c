@@ -13,6 +13,11 @@
 #define MAXKEYLEN 128
 #define MAXVALLEN 1024
 
+static ErlNifResourceType* cattrans_res = NULL;
+typedef struct _transaction_t {
+    CatTransaction* _trans;
+} transaction_t;
+
 static ERL_NIF_TERM make_atom(ErlNifEnv *env, const char *atom_name) {
     ERL_NIF_TERM atom;
     if(enif_make_existing_atom(env, atom_name, &atom, ERL_NIF_LATIN1)) {
@@ -20,6 +25,21 @@ static ERL_NIF_TERM make_atom(ErlNifEnv *env, const char *atom_name) {
     }
     return enif_make_atom(env, atom_name);
 }
+
+static void cattrans_cleanup(ErlNifEnv* env, void* arg) {
+
+    //enif_free(arg);
+}
+
+static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM load_info)
+{
+    cattrans_res = enif_open_resource_type(env,NULL,"cattrans",
+        &cattrans_cleanup,
+        ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER
+        ,NULL);
+    return 0;
+}
+
 
 //Common Apis.
 
@@ -32,7 +52,14 @@ ERL_NIF_TERM catClientInitForErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM
         return enif_make_badarg(env);
     }
     
-    return enif_make_int(env, catClientInit(appKey));
+    CatClientConfig config = DEFAULT_CCAT_CONFIG;
+    config.enableHeartbeat = 0;
+    config.enableDebugLog = 1;
+    config.encoderType = 0;
+    // catClientInitWithConfig(appKey, &config);
+
+    return enif_make_int(env, catClientInitWithConfig(appKey,&config));
+    //return enif_make_int(env, catClientInit(appKey));
 }
 
 // 返回cat版本.
@@ -185,6 +212,48 @@ ERL_NIF_TERM logTransactionWithDurationOfErlang(ErlNifEnv* env, int argc, const 
     return make_atom(env, "ok");
 }
 
+// 记录耗时类的Transaction.
+ERL_NIF_TERM newTransactionOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    char type[MAXKEYLEN];
+    (void)memset(&type, '\0', sizeof(type));
+    
+    if (enif_get_string(env, argv[0], type, sizeof(type), ERL_NIF_LATIN1) < 1) {
+        return enif_make_badarg(env);
+    }
+    
+    char name[MAXKEYLEN];
+    (void)memset(&name, '\0', sizeof(name));
+    
+    if (enif_get_string(env, argv[1], name, sizeof(name), ERL_NIF_LATIN1) < 1) {
+        return enif_make_badarg(env);
+    }
+    
+    CatTransaction *trans = newTransaction(type, name);
+    printf("aaaaaaaaaaaaaaaaaaa\n");
+    transaction_t* trans_t = (transaction_t*)enif_alloc_resource(cattrans_res, sizeof(transaction_t));
+    printf("trans_t %p\n", trans_t);
+    trans_t->_trans = trans ;
+    ERL_NIF_TERM term = enif_make_resource(env, trans_t);
+    printf("term %p\n", trans_t);
+    enif_release_resource(trans_t);
+    return term;
+}
+
+// 记录耗时类的Transaction.
+ERL_NIF_TERM completeOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    // CatTransaction *trans;
+    transaction_t* trans_t;
+    if (!enif_get_resource(env, argv[0], cattrans_res, (void**) &trans_t)) {
+        return enif_make_badarg(env);
+    }
+    // printf("getcattrans %s\n",trans_t);
+    CatTransaction *trans=trans_t->_trans;
+    trans->setStatus(trans, CAT_SUCCESS);
+    trans->complete(trans);
+
+    return make_atom(env, "ok");
+}
+
 // 创建messageId.
 ERL_NIF_TERM createMessageIdOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     return enif_make_string(env, createMessageId(), ERL_NIF_LATIN1);
@@ -198,6 +267,9 @@ static ErlNifFunc nif_funcs[] = {
     {"cat_client_destroy", 0, catClientDestroyForErlang},
     {"create_message_id", 0, createMessageIdOfErlang},
     
+    {"new_transaction",2,newTransactionOfErlang},
+    {"complete",1,completeOfErlang},
+
     {"log_event", 4, logEventForErlang},
     {"log_error", 2, logErrorForErlang},
     {"log_metric_for_count", 2, logMetricForCountOfErlang},
@@ -206,5 +278,5 @@ static ErlNifFunc nif_funcs[] = {
     {"log_transaction_with_duration", 3, logTransactionWithDurationOfErlang}
 };
 
-ERL_NIF_INIT(erlcat, nif_funcs, NULL, NULL, NULL, NULL);
+ERL_NIF_INIT(erlcat, nif_funcs, &load, NULL, NULL, NULL);
 
