@@ -27,8 +27,7 @@ static ERL_NIF_TERM make_atom(ErlNifEnv *env, const char *atom_name) {
 }
 
 static void cattrans_cleanup(ErlNifEnv* env, void* arg) {
-
-    //enif_free(arg);
+    enif_free(arg);
 }
 
 static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM load_info)
@@ -229,17 +228,14 @@ ERL_NIF_TERM newTransactionOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM
     }
     
     CatTransaction *trans = newTransaction(type, name);
-    printf("aaaaaaaaaaaaaaaaaaa\n");
     transaction_t* trans_t = (transaction_t*)enif_alloc_resource(cattrans_res, sizeof(transaction_t));
-    printf("trans_t %p\n", trans_t);
     trans_t->_trans = trans ;
     ERL_NIF_TERM term = enif_make_resource(env, trans_t);
-    printf("term %p\n", trans_t);
     enif_release_resource(trans_t);
     return term;
 }
 
-// 记录耗时类的Transaction.
+// 记录耗时类的Transaction complete.
 ERL_NIF_TERM completeOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     // CatTransaction *trans;
     transaction_t* trans_t;
@@ -248,9 +244,25 @@ ERL_NIF_TERM completeOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
     }
     // printf("getcattrans %s\n",trans_t);
     CatTransaction *trans=trans_t->_trans;
-    trans->setStatus(trans, CAT_SUCCESS);
     trans->complete(trans);
+    trans_t->_trans=NULL;
+    return make_atom(env, "ok");
+}
 
+ERL_NIF_TERM setStatusOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    // CatTransaction *trans;
+    transaction_t* trans_t;
+    char status[MAXKEYLEN];
+    if (!enif_get_resource(env, argv[0], cattrans_res, (void**) &trans_t)) {
+        return enif_make_badarg(env);
+    }
+    (void)memset(&status, '\0', sizeof(status));
+    if (enif_get_string(env, argv[1], status, sizeof(status), ERL_NIF_LATIN1) < 1) {
+        return enif_make_badarg(env);
+    }
+    // printf("getcattrans %s\n",trans_t);
+    CatTransaction *trans=trans_t->_trans;
+    trans->setStatus(trans, status);
     return make_atom(env, "ok");
 }
 
@@ -269,6 +281,7 @@ static ErlNifFunc nif_funcs[] = {
     
     {"new_transaction",2,newTransactionOfErlang},
     {"complete",1,completeOfErlang},
+    {"set_status",2,setStatusOfErlang},
 
     {"log_event", 4, logEventForErlang},
     {"log_error", 2, logErrorForErlang},
