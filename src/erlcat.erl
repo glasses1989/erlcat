@@ -2,7 +2,7 @@
 
 -export([init/0, cat_client_init/1, cat_version/0, is_cat_enabled/0, cat_client_destroy/0, create_message_id/0, log_event/4, log_error/2, log_metric_for_count/2, log_metric_for_duration/2, log_metric_for_sum/2, log_transaction_with_duration/3]).
 
--export([new_transaction/2,complete/1]).
+-export([new_transaction/2,complete/1,set_status/2]).
 -on_load(init/0).
 
 -define(APPNAME, erlcat).

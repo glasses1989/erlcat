@@ -27,7 +27,7 @@ static ERL_NIF_TERM make_atom(ErlNifEnv *env, const char *atom_name) {
 }
 
 static void cattrans_cleanup(ErlNifEnv* env, void* arg) {
-    enif_free(arg);
+//    enif_free(arg);
 }
 
 static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM load_info)
@@ -214,38 +214,44 @@ ERL_NIF_TERM logTransactionWithDurationOfErlang(ErlNifEnv* env, int argc, const 
 // 记录耗时类的Transaction.
 ERL_NIF_TERM newTransactionOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     char type[MAXKEYLEN];
+    char name[MAXKEYLEN];
+//    CatTransaction* trans;
+    transaction_t* trans_t;
+    ERL_NIF_TERM retterm;
     (void)memset(&type, '\0', sizeof(type));
     
     if (enif_get_string(env, argv[0], type, sizeof(type), ERL_NIF_LATIN1) < 1) {
         return enif_make_badarg(env);
     }
-    
-    char name[MAXKEYLEN];
+
     (void)memset(&name, '\0', sizeof(name));
     
     if (enif_get_string(env, argv[1], name, sizeof(name), ERL_NIF_LATIN1) < 1) {
         return enif_make_badarg(env);
     }
-    
-    CatTransaction *trans = newTransaction(type, name);
-    transaction_t* trans_t = (transaction_t*)enif_alloc_resource(cattrans_res, sizeof(transaction_t));
-    trans_t->_trans = trans ;
-    ERL_NIF_TERM term = enif_make_resource(env, trans_t);
-    enif_release_resource(trans_t);
-    return term;
+
+    trans_t = enif_alloc_resource(cattrans_res, sizeof(transaction_t));
+    if(trans_t == NULL) return enif_make_badarg(env);
+    retterm = enif_make_resource(env, trans_t);
+
+	trans_t->_trans = newTransaction(type, name);
+
+//    enif_release_resource(trans_t);
+    return retterm;
 }
 
 // 记录耗时类的Transaction complete.
 ERL_NIF_TERM completeOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-    // CatTransaction *trans;
+    CatTransaction *trans;
     transaction_t* trans_t;
     if (!enif_get_resource(env, argv[0], cattrans_res, (void**) &trans_t)) {
         return enif_make_badarg(env);
     }
-    // printf("getcattrans %s\n",trans_t);
-    CatTransaction *trans=trans_t->_trans;
+    printf("getcattrans %s\n",trans_t);
+    trans=trans_t->_trans;
     trans->complete(trans);
     trans_t->_trans=NULL;
+    enif_release_resource(trans_t);
     return make_atom(env, "ok");
 }
 
