@@ -314,7 +314,7 @@ ERL_NIF_TERM addDataForTransOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TER
     }
     
     CatTransaction *trans = trans_t->_trans;
-    trans->addDate(trans, data);
+    trans->addData(trans, data);
     return make_atom(env, "ok");
 }
 
@@ -360,7 +360,7 @@ ERL_NIF_TERM completeForTransOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TE
 //Resource Load.
 
 static void transaction_destruct(ErlNifEnv* env, void *obj) {
-    struct transaction_t *trans_t = (struct transaction_t*)obj;
+    transaction_t *trans_t = (struct transaction_t*)obj;
     free(trans_t->_trans);
     free(trans_t);
     enif_release_resource(obj);
