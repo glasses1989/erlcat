@@ -10,7 +10,7 @@
 #include "../include/client.h"
 #include "erl_nif.h"
 
-#define MAXKEYLEN 128/Users/mac/Desktop/Programs/erlcat/src/erlcat.erl
+#define MAXKEYLEN 128
 #define MAXVALLEN 1024
 
 static ErlNifResourceType* cattrans_res;
