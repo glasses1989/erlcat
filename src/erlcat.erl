@@ -65,30 +65,30 @@ log_metric_for_sum(_Name, _Value) ->
 
 %% === Transaction Apis ===
 
-new_transaction(Name, Type) ->
-	?NOT_LOADED.
-
-set_status_of_transaction(_CatTransaction, _State)->
-	?NOT_LOADED.
-
-set_timestamp_of_transaction(_CatTransaction, _Timestamp)->
-	?NOT_LOADED.
-
-set_duration_of_transaction(_CatTransaction, _Duration)->
-	?NOT_LOADED.
-
-set_duration_start_of_transaction(_CatTransaction, _DurationStart)->
-	?NOT_LOADED.
-
-add_data_of_transaction(_CatTransaction, _Data)->
-	?NOT_LOADED.
-
-add_kv_of_transaction(_CatTransaction, _Key, _Value)->
-	?NOT_LOADED.
-
-complete_of_transaction(_CatTransaction)->
-	?NOT_LOADED.
-
 log_transaction_with_duration(_Type, _Name, _Duration) ->
+    ?NOT_LOADED.
+
+new_transaction(_Name, _Type) ->
+	?NOT_LOADED.
+
+set_status(_CatTransaction, _State)->
+	?NOT_LOADED.
+
+set_timestamp(_CatTransaction, _Timestamp)->
+	?NOT_LOADED.
+
+set_duration(_CatTransaction, _Duration)->
+	?NOT_LOADED.
+
+set_duration_start(_CatTransaction, _DurationStart)->
+	?NOT_LOADED.
+
+add_data(_CatTransaction, _Data)->
+	?NOT_LOADED.
+
+add_kv(_CatTransaction, _Key, _Value)->
+	?NOT_LOADED.
+
+complete(_CatTransaction)->
     ?NOT_LOADED.
 

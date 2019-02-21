@@ -360,7 +360,7 @@ ERL_NIF_TERM completeForTransOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TE
 //Resource Load.
 
 static void transaction_destruct(ErlNifEnv* env, void *obj) {
-    transaction_t *trans_t = (struct transaction_t*)obj;
+    transaction_t *trans_t = (transaction_t*)obj;
     free(trans_t->_trans);
     free(trans_t);
     enif_release_resource(obj);
@@ -373,14 +373,6 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
             return -1;
         }
     }
-    return 0;
-}
-
-static int reload(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
-    return 0;
-}
-
-static int upgrade(ErlNifEnv* env, void** priv, void** old_priv, ERL_NIF_TERM info) {
     return 0;
 }
 
@@ -404,11 +396,11 @@ static ErlNifFunc nif_funcs[] = {
     {"set_status", 2, setStatusForTransOfErlang},
     {"set_timestamp", 2, setTimestampForTransOfErlang},
     {"set_duration", 2, setDurationForTransOfErlang},
-    {"set_duration_startn", 2,setDurationStartForTransOfErlang},
+    {"set_duration_start", 2,setDurationStartForTransOfErlang},
     {"add_data", 2, addDataForTransOfErlang},
     {"add_kv", 3, addKeyValueForTransOfErlang},
     {"complete", 1, completeForTransOfErlang}
 };
 
-ERL_NIF_INIT(erlcat, nif_funcs, &load, &reload, &upgrade, NULL);
+ERL_NIF_INIT(erlcat, nif_funcs, &load, NULL, NULL, NULL);
 
