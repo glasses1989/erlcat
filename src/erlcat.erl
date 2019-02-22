@@ -96,7 +96,7 @@ complete(_CatTransaction)->
 create_message_id() ->
     ?NOT_LOADED. 
 
-create_remote_message_id() ->
+create_remote_message_id(_AppKey) ->
     ?NOT_LOADED. 
 
 get_message_tree_id() ->
@@ -108,11 +108,11 @@ get_message_tree_root_id() ->
 get_message_tree_parent_id() ->
     ?NOT_LOADED. 
 
-set_message_tree_id() ->
+set_message_tree_id(_MessageId) ->
     ?NOT_LOADED. 
 
-set_message_tree_root_id() ->
+set_message_tree_root_id(_MessageId) ->
     ?NOT_LOADED. 
 
-set_message_tree_parent_id() ->
+set_message_tree_parent_id(_MessageId) ->
     ?NOT_LOADED.
