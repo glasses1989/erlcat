@@ -1,0 +1,2 @@
+/usr/local/lib/libcatclient.dylib
+/usr/local/lib/libcatclient.a

@@ -1,0 +1,8 @@
+/Users/mac/Desktop/Programs/erlcat/c_src/CMakeFiles/install/local.dir
+/Users/mac/Desktop/Programs/erlcat/c_src/CMakeFiles/rebuild_cache.dir
+/Users/mac/Desktop/Programs/erlcat/c_src/CMakeFiles/edit_cache.dir
+/Users/mac/Desktop/Programs/erlcat/c_src/CMakeFiles/list_install_components.dir
+/Users/mac/Desktop/Programs/erlcat/c_src/CMakeFiles/catclient-shared.dir
+/Users/mac/Desktop/Programs/erlcat/c_src/CMakeFiles/install/strip.dir
+/Users/mac/Desktop/Programs/erlcat/c_src/CMakeFiles/install.dir
+/Users/mac/Desktop/Programs/erlcat/c_src/CMakeFiles/catclient-static.dir
