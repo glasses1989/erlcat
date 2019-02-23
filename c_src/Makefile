@@ -28,7 +28,7 @@ else ifeq ($(UNAME_SYS), FreeBSD)
 	CXXFLAGS ?= -O3 -finline-functions -Wall
 else ifeq ($(UNAME_SYS), Linux)
 	CC ?= gcc
-	CFLAGS ?= -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes -Wno-discarded-qualifiers -Wno-incompatible-pointer-types
+	CFLAGS ?= -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes -Wno-discarded-qualifiers -Wno-incompatible-pointer-types -pthread -D_GNU_SOURCE
 	CXXFLAGS ?= -O3 -finline-functions -Wall
 endif
 

@@ -29,4 +29,5 @@ send_trans(Index)->
 	send_trans(Index-1).
 
 sleep1()->
-	timer:sleep(random:uniform(200)).	
+
+	timer:sleep(rand:uniform(200)).
