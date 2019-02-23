@@ -1,8 +1,10 @@
 -module(erlcat).
 
--export([init/0, cat_client_init/1, cat_version/0, is_cat_enabled/0, cat_client_destroy/0, create_message_id/0]).
+-export([init/0, init_cat/1, get_cat_version/0, is_cat_enabled/0, destroy_cat/0]).
 -export([log_event/4, log_error/2, log_metric_for_count/2, log_metric_for_duration/2, log_metric_for_sum/2, log_transaction_with_duration/3]).
 -export([new_transaction/2, set_status/2, set_timestamp/2, set_duration/2, set_duration_start/2, add_data/2, add_kv/3, complete/1]).
+-export([create_message_id/0, create_remote_message_id/1, get_message_tree_id/0, get_message_tree_root_id/0, get_message_tree_parent_id/0]).
+-export([set_message_tree_id/1, set_message_tree_root_id/1, set_message_tree_parent_id/1]).
 
 -on_load(init/0).
 
@@ -29,19 +31,16 @@ not_loaded(Line) ->
 
 %% === Common Apis ===
 
-cat_client_init(_AppKey) ->
+init_cat(_AppKey) ->
     ?NOT_LOADED.
 
-cat_version() ->
+get_cat_version() ->
     ?NOT_LOADED.
 
 is_cat_enabled() ->
     ?NOT_LOADED.
 
-cat_client_destroy() ->
-    ?NOT_LOADED.
-
-create_message_id() ->
+destroy_cat() ->
     ?NOT_LOADED.
 
 %% === Event Apis ===
@@ -65,30 +64,55 @@ log_metric_for_sum(_Name, _Value) ->
 
 %% === Transaction Apis ===
 
-new_transaction(Name, Type) ->
-	?NOT_LOADED.
-
-set_status_of_transaction(_CatTransaction, _State)->
-	?NOT_LOADED.
-
-set_timestamp_of_transaction(_CatTransaction, _Timestamp)->
-	?NOT_LOADED.
-
-set_duration_of_transaction(_CatTransaction, _Duration)->
-	?NOT_LOADED.
-
-set_duration_start_of_transaction(_CatTransaction, _DurationStart)->
-	?NOT_LOADED.
-
-add_data_of_transaction(_CatTransaction, _Data)->
-	?NOT_LOADED.
-
-add_kv_of_transaction(_CatTransaction, _Key, _Value)->
-	?NOT_LOADED.
-
-complete_of_transaction(_CatTransaction)->
-	?NOT_LOADED.
-
 log_transaction_with_duration(_Type, _Name, _Duration) ->
     ?NOT_LOADED.
 
+new_transaction(_Name, _Type) ->
+	?NOT_LOADED.
+
+set_status(_CatTransaction, _State)->
+	?NOT_LOADED.
+
+set_timestamp(_CatTransaction, _Timestamp)->
+	?NOT_LOADED.
+
+set_duration(_CatTransaction, _Duration)->
+	?NOT_LOADED.
+
+set_duration_start(_CatTransaction, _DurationStart)->
+	?NOT_LOADED.
+
+add_data(_CatTransaction, _Data)->
+	?NOT_LOADED.
+
+add_kv(_CatTransaction, _Key, _Value)->
+	?NOT_LOADED.
+
+complete(_CatTransaction)->
+    ?NOT_LOADED.
+
+%% === MessageId Apis ===    
+
+create_message_id() ->
+    ?NOT_LOADED. 
+
+create_remote_message_id(_AppKey) ->
+    ?NOT_LOADED. 
+
+get_message_tree_id() ->
+    ?NOT_LOADED. 
+
+get_message_tree_root_id() ->
+    ?NOT_LOADED. 
+
+get_message_tree_parent_id() ->
+    ?NOT_LOADED. 
+
+set_message_tree_id(_MessageId) ->
+    ?NOT_LOADED. 
+
+set_message_tree_root_id(_MessageId) ->
+    ?NOT_LOADED. 
+
+set_message_tree_parent_id(_MessageId) ->
+    ?NOT_LOADED.
