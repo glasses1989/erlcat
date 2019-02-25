@@ -41,6 +41,7 @@ ERL_NIF_TERM initCatClient(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) 
     CatClientConfig config = DEFAULT_CCAT_CONFIG;
     config.enableHeartbeat = 0;
     config.enableDebugLog = 0;
+    // 不能设置为字符编码类型.
     config.encoderType = 0;
 
     return enif_make_int(env, catClientInitWithConfig(appKey, &config));
@@ -225,7 +226,7 @@ ERL_NIF_TERM newTransactionOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM
 }
 
 // 设置Transaction状态.
-ERL_NIF_TERM setStatusOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+ERL_NIF_TERM setStatusForTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     transaction_t* trans_t;
     if (!enif_get_resource(env, argv[0], cattrans_res, (void**) &trans_t)) {
         return enif_make_badarg(env);
@@ -243,7 +244,7 @@ ERL_NIF_TERM setStatusOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM
 }
 
 // 设置Transaction时间戳
-ERL_NIF_TERM setTimestampOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+ERL_NIF_TERM setTimestampForTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     transaction_t* trans_t;
     if (!enif_get_resource(env, argv[0], cattrans_res, (void**) &trans_t)) {
         return enif_make_badarg(env);
@@ -260,7 +261,7 @@ ERL_NIF_TERM setTimestampOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_T
 }
 
 // 设置Transaction持续时间.
-ERL_NIF_TERM setDurationOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+ERL_NIF_TERM setDurationForTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     transaction_t* trans_t;
     if (!enif_get_resource(env, argv[0], cattrans_res, (void**) &trans_t)) {
         return enif_make_badarg(env);
@@ -277,7 +278,7 @@ ERL_NIF_TERM setDurationOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TE
 }
 
 // 设置Transaction持续的起始时间.
-ERL_NIF_TERM setDurationStartOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+ERL_NIF_TERM setDurationStartForTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     transaction_t* trans_t;
     if (!enif_get_resource(env, argv[0], cattrans_res, (void**) &trans_t)) {
         return enif_make_badarg(env);
@@ -294,7 +295,7 @@ ERL_NIF_TERM setDurationStartOfTransaction(ErlNifEnv* env, int argc, const ERL_N
 }
 
 // 添加Transaction附加数据.
-ERL_NIF_TERM addDataOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+ERL_NIF_TERM addDataForTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     transaction_t* trans_t;
     if (!enif_get_resource(env, argv[0], cattrans_res, (void**) &trans_t)) {
         return enif_make_badarg(env);
@@ -312,7 +313,7 @@ ERL_NIF_TERM addDataOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 }
 
 // 添加Transaction附加数据（key-value格式）.
-ERL_NIF_TERM addKeyValueOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+ERL_NIF_TERM addKeyValueForTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     transaction_t* trans_t;
     if (!enif_get_resource(env, argv[0], cattrans_res, (void**) &trans_t)) {
         return enif_make_badarg(env);
@@ -336,7 +337,7 @@ ERL_NIF_TERM addKeyValueOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TE
 }
 
 // 提交Transaction.
-ERL_NIF_TERM completeOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+ERL_NIF_TERM completeForTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     CatTransaction *trans;
     transaction_t* trans_t;
     if (!enif_get_resource(env, argv[0], cattrans_res, (void**) &trans_t)) {
@@ -349,76 +350,79 @@ ERL_NIF_TERM completeOfTransaction(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
     enif_release_resource(trans_t);
     return make_atom(env, "ok");
 }
-//
-//// MessageID Apis.
-//
-//// 创建messageId.
-//ERL_NIF_TERM createMessageId(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-//    return enif_make_string(env, createMessageId(), ERL_NIF_LATIN1);
-//}
-//
-//// 创建messageId(指定远程服务).
-//ERL_NIF_TERM createRemoteMessageId(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-//    char appKey[MAXKEYLEN];
-//    (void)memset(&appKey, '\0', sizeof(appKey));
-//
-//    if (enif_get_string(env, argv[0], appKey, sizeof(appKey), ERL_NIF_LATIN1) < 1) {
-//        return enif_make_badarg(env);
-//    }
-//
-//    return enif_make_string(env, createRemoteServerMessageId(appKey), ERL_NIF_LATIN1);
-//}
-//
-//// 获取本地messageTreeId.
-//ERL_NIF_TERM getThreadLocalMessageTreeId(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-//    return enif_make_string(env, getThreadLocalMessageTreeId(), ERL_NIF_LATIN1);
-//}
-//
-//// 获取本地messageTreeRootId.
-//ERL_NIF_TERM getThreadLocalMessageTreeRootId(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-//    return enif_make_string(env, getThreadLocalMessageTreeRootId(), ERL_NIF_LATIN1);
-//}
-//
-//// 获取本地messageTreeParentId.
-//ERL_NIF_TERM getThreadLocalMessageTreeParentId(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-//    return enif_make_string(env, getThreadLocalMessageTreeParentId(), ERL_NIF_LATIN1);
-//}
-//
-//// 设置本地messageTreeId.
-//ERL_NIF_TERM setThreadLocalMessageTreeId(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-//    char messageID[MAXKEYLEN];
-//    (void)memset(&messageID, '\0', sizeof(messageID));
-//
-//    if (enif_get_string(env, argv[0], messageID, sizeof(messageID), ERL_NIF_LATIN1) < 1) {
-//        return enif_make_badarg(env);
-//    }
-//
-//    return enif_make_string(env, setThreadLocalMessageTreeId(messageID), ERL_NIF_LATIN1);
-//}
-//
-//// 设置本地messageTreeId.
-//ERL_NIF_TERM setThreadLocalMessageTreeRootId(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-//    char messageID[MAXKEYLEN];
-//    (void)memset(&messageID, '\0', sizeof(messageID));
-//
-//    if (enif_get_string(env, argv[0], messageID, sizeof(messageID), ERL_NIF_LATIN1) < 1) {
-//        return enif_make_badarg(env);
-//    }
-//
-//    return enif_make_string(env, setThreadLocalMessageTreeRootId(messageID), ERL_NIF_LATIN1);
-//}
-//
-//// 设置本地messageTreeId.
-//ERL_NIF_TERM setThreadLocalMessageTreeParentId(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-//    char messageID[MAXKEYLEN];
-//    (void)memset(&messageID, '\0', sizeof(messageID));
-//
-//    if (enif_get_string(env, argv[0], messageID, sizeof(messageID), ERL_NIF_LATIN1) < 1) {
-//        return enif_make_badarg(env);
-//    }
-//
-//    return enif_make_string(env, setThreadLocalMessageTreeParentId(messageID), ERL_NIF_LATIN1);
-//}
+
+// MessageID Apis.
+
+// 创建messageId.
+ERL_NIF_TERM createMessageIdOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    return enif_make_string(env, createMessageId(), ERL_NIF_LATIN1);
+}
+
+// 创建messageId(指定远程服务).
+ERL_NIF_TERM createRemoteMessageIdOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    char appKey[MAXKEYLEN];
+    (void)memset(&appKey, '\0', sizeof(appKey));
+
+    if (enif_get_string(env, argv[0], appKey, sizeof(appKey), ERL_NIF_LATIN1) < 1) {
+        return enif_make_badarg(env);
+    }
+
+    return enif_make_string(env, createRemoteServerMessageId(appKey), ERL_NIF_LATIN1);
+}
+
+// 获取本地messageTreeId.
+ERL_NIF_TERM getMessageTreeIdOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    return enif_make_string(env, getThreadLocalMessageTreeId(), ERL_NIF_LATIN1);
+}
+
+// 获取本地messageTreeRootId.
+ERL_NIF_TERM getMessageTreeRootIdOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    return enif_make_string(env, getThreadLocalMessageTreeRootId(), ERL_NIF_LATIN1);
+}
+
+// 获取本地messageTreeParentId.
+ERL_NIF_TERM getMessageTreeParentIdOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    return enif_make_string(env, getThreadLocalMessageTreeParentId(), ERL_NIF_LATIN1);
+}
+
+// 设置本地messageTreeId.
+ERL_NIF_TERM setMessageTreeIdOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    char messageId[MAXKEYLEN];
+    (void)memset(&messageId, '\0', sizeof(messageId));
+
+    if (enif_get_string(env, argv[0], messageId, sizeof(messageId), ERL_NIF_LATIN1) < 1) {
+        return enif_make_badarg(env);
+    }
+    
+    setThreadLocalMessageTreeId(messageId);
+    return make_atom(env, "ok");
+}
+
+// 设置本地messageTreeId.
+ERL_NIF_TERM setMessageTreeRootIdOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    char messageId[MAXKEYLEN];
+    (void)memset(&messageId, '\0', sizeof(messageId));
+
+    if (enif_get_string(env, argv[0], messageId, sizeof(messageId), ERL_NIF_LATIN1) < 1) {
+        return enif_make_badarg(env);
+    }
+    
+    setThreadLocalMessageTreeRootId(messageId);
+    return make_atom(env, "ok");
+}
+
+// 设置本地messageTreeId.
+ERL_NIF_TERM setMessageTreeParentIdOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    char messageId[MAXKEYLEN];
+    (void)memset(&messageId, '\0', sizeof(messageId));
+
+    if (enif_get_string(env, argv[0], messageId, sizeof(messageId), ERL_NIF_LATIN1) < 1) {
+        return enif_make_badarg(env);
+    }
+    
+    setThreadLocalMessageTreeParentId(messageId);
+    return make_atom(env, "ok");
+}
 
 //Resource Load.
 
@@ -455,22 +459,22 @@ static ErlNifFunc nif_funcs[] = {
     {"log_transaction_with_duration", 3, logTransactionWithDurationOfErlang},
     
     {"new_transaction", 2, newTransactionOfErlang},
-    {"set_status", 2, setStatusOfTransaction},
-    {"set_timestamp", 2, setTimestampOfTransaction},
-    {"set_duration", 2, setDurationOfTransaction},
-    {"set_duration_start", 2,setDurationStartOfTransaction},
-    {"add_data", 2, addDataOfTransaction},
-    {"add_kv", 3, addKeyValueOfTransaction},
-    {"complete", 1, completeOfTransaction}
+    {"set_status", 2, setStatusForTransaction},
+    {"set_timestamp", 2, setTimestampForTransaction},
+    {"set_duration", 2, setDurationForTransaction},
+    {"set_duration_start", 2,setDurationStartForTransaction},
+    {"add_data", 2, addDataForTransaction},
+    {"add_kv", 3, addKeyValueForTransaction},
+    {"complete", 1, completeForTransaction},
     
-//    {"create_message_id", 0, createMessageId},
-//    {"create_remote_message_id", 1, createRemoteMessageId},
-//    {"get_message_tree_id", 0, getThreadLocalMessageTreeId},
-//    {"get_message_tree_root_id", 0, getThreadLocalMessageTreeRootId},
-//    {"get_message_tree_parent_id", 0, getThreadLocalMessageTreeParentId},
-//    {"set_message_tree_id", 1, setThreadLocalMessageTreeId},
-//    {"set_message_tree_root_id", 1, setThreadLocalMessageTreeRootId},
-//    {"set_message_tree_parent_id", 1, setThreadLocalMessageTreeParentId}
+    {"create_message_id", 0, createMessageIdOfErlang},
+    {"create_remote_message_id", 1, createRemoteMessageIdOfErlang},
+    {"get_message_tree_id", 0, getMessageTreeIdOfErlang},
+    {"get_message_tree_root_id", 0, getMessageTreeRootIdOfErlang},
+    {"get_message_tree_parent_id", 0, getMessageTreeParentIdOfErlang},
+    {"set_message_tree_id", 1, setMessageTreeIdOfErlang},
+    {"set_message_tree_root_id", 1, setMessageTreeRootIdOfErlang},
+    {"set_message_tree_parent_id", 1, setMessageTreeParentIdOfErlang}
 };
 
 ERL_NIF_INIT(erlcat, nif_funcs, &load, NULL, NULL, NULL);
