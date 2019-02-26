@@ -327,7 +327,7 @@ ERL_NIF_TERM addKeyValueForTransaction(ErlNifEnv* env, int argc, const ERL_NIF_T
     
     char value[MAXVALLEN];
     (void)memset(&value, '\0', sizeof(value));
-    if (enif_get_string(env, argv[1], value, sizeof(value), ERL_NIF_LATIN1) < 1) {
+    if (enif_get_string(env, argv[2], value, sizeof(value), ERL_NIF_LATIN1) < 1) {
         return enif_make_badarg(env);
     }
     
