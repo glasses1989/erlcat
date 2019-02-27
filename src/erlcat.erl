@@ -1,6 +1,8 @@
 -module(erlcat).
 
--export([init/0, init_cat/1, get_cat_version/0, is_cat_enabled/0, destroy_cat/0]).
+-include("erlcat.hrl").
+
+-export([init/0, init_cat/2,init_cat/6, get_cat_version/0, is_cat_enabled/0, destroy_cat/0]).
 -export([log_event/4, log_error/2, log_metric_for_count/2, log_metric_for_duration/2, log_metric_for_sum/2, log_transaction_with_duration/3]).
 -export([new_transaction/2, set_status/2, set_timestamp/2, set_duration/2, set_duration_start/2, add_data/2, add_kv/3, complete/1]).
 -export([create_message_id/0, create_remote_message_id/1, get_message_tree_id/0, get_message_tree_root_id/0, get_message_tree_parent_id/0]).
@@ -30,8 +32,11 @@ not_loaded(Line) ->
     erlang:nif_error({not_loaded, [{module, ?MODULE}, {line, Line}]}).
 
 %% === Common Apis ===
+init_cat(Appkey,CatConfile)->
+    #cat_config{encoder_type = EncodeType,enable_heartbeat = HeartBeat,enable_sampling =  Sampling,enable_multiprocessing =  Multiprocess,enable_debugLog = Debug}=CatConfile,
+    init_cat(Appkey,EncodeType,HeartBeat,Sampling,Multiprocess,Debug).
 
-init_cat(_AppKey) ->
+init_cat(_AppKey,_EncodeType,_HeartBeat,_Sampling,_Multiprocess,_Debug) ->
     ?NOT_LOADED.
 
 get_cat_version() ->

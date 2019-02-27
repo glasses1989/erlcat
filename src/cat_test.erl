@@ -1,6 +1,6 @@
 -module(cat_test).
 
-
+-include("erlcat.hrl").
 -export([event/0,trans/0]).
 
 
@@ -9,7 +9,7 @@ event()->
 	ok.
 
 trans()->
-	erlcat:cat_client_init("mpush"),
+	erlcat:cat_client_init("mpush",#cat_config{}),
 	send_trans(20),
 	ok.
 

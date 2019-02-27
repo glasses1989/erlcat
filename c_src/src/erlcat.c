@@ -32,17 +32,33 @@ static ERL_NIF_TERM make_atom(ErlNifEnv *env, const char *atom_name) {
 // 初始化cat实例.
 ERL_NIF_TERM initCatClient(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     char appKey[MAXKEYLEN];
+    CatClientConfig config = DEFAULT_CCAT_CONFIG;
+
     (void)memset(&appKey, '\0', sizeof(appKey));
     
     if (enif_get_string(env, argv[0], appKey, sizeof(appKey), ERL_NIF_LATIN1) < 1) {
         return enif_make_badarg(env);
     }
-    
-    CatClientConfig config = DEFAULT_CCAT_CONFIG;
-    config.enableHeartbeat = 0;
-    config.enableDebugLog = 0;
+//    config.enableHeartbeat = 0;
+//    config.enableDebugLog = 0;
     // 不能设置为字符编码类型.
-    config.encoderType = 0;
+//    config.encoderType = 0;
+
+    if (!enif_get_int(env, argv[1], &config.encoderType)) {
+            return enif_make_badarg(env);
+    }
+    if (!enif_get_int(env, argv[2], &config.enableHeartbeat)) {
+                return enif_make_badarg(env);
+    }
+    if (!enif_get_int(env, argv[3], &config.enableSampling)) {
+                return enif_make_badarg(env);
+    }
+    if (!enif_get_int(env, argv[4], &config.enableMultiprocessing)) {
+                return enif_make_badarg(env);
+    }
+    if (!enif_get_int(env, argv[5], &config.enableDebugLog)) {
+                return enif_make_badarg(env);
+    }
 
     return enif_make_int(env, catClientInitWithConfig(appKey, &config));
 }
@@ -427,10 +443,10 @@ ERL_NIF_TERM setMessageTreeParentIdOfErlang(ErlNifEnv* env, int argc, const ERL_
 //Resource Load.
 
 static void transaction_destruct(ErlNifEnv* env, void *obj) {
-    transaction_t *trans_t = (transaction_t*)obj;
-    free(trans_t->_trans);
-    free(trans_t);
-    enif_release_resource(obj);
+//    transaction_t *trans_t = (transaction_t*)obj;
+//    free(trans_t->_trans);
+//    free(trans_t);
+//    enif_release_resource(obj);
 }
 
 static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
@@ -444,7 +460,7 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
 }
 
 static ErlNifFunc nif_funcs[] = {
-    {"init_cat", 1, initCatClient},
+    {"init_cat", 6, initCatClient},
     
     {"get_cat_version", 0, getCatVersion},
     {"is_cat_enabled", 0, isCatEnabledOfErlang},
