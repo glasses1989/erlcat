@@ -39,10 +39,12 @@ ERL_NIF_TERM initCatClient(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) 
     }
     
     CatClientConfig config = DEFAULT_CCAT_CONFIG;
-    config.enableHeartbeat = 0;
-    config.enableDebugLog = 0;
     // 不能设置为字符编码类型.
     config.encoderType = 0;
+    config.enableHeartbeat = 1;
+    config.enableSampling = 0;
+    config.enableMultiprocessing = 0;
+    config.enableDebugLog = 0;
 
     return enif_make_int(env, catClientInitWithConfig(appKey, &config));
 }

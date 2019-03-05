@@ -29,6 +29,9 @@ init() ->
 not_loaded(Line) ->
     erlang:nif_error({not_loaded, [{module, ?MODULE}, {line, Line}]}).
 
+set_cat_enabled(_Enabled) ->
+    ?NOT_LOADED.
+
 %% === Common Apis ===
 
 init_cat(_AppKey) ->
