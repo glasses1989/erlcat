@@ -1,7 +1,7 @@
 -module(cat_test).
 
 -include("erlcat.hrl").
--export([event/0,trans/0]).
+-export([event/0,trans/0,heart/0]).
 
 
 event()->
@@ -9,7 +9,7 @@ event()->
 	ok.
 
 trans()->
-	erlcat:cat_client_init("mpush",#cat_config{}),
+	erlcat:cat_client_init("testapp",#cat_config{}),
 	send_trans(20),
 	ok.
 
@@ -31,3 +31,14 @@ send_trans(Index)->
 sleep1()->
 
 	timer:sleep(rand:uniform(200)).
+
+
+heart()->
+	erlcat:init_cat("testapp",#cat_config{}),
+    Data = #{
+        "userinfo" => integer_to_list(rand:uniform(1000)),
+        "test22" => integer_to_list(rand:uniform(1000)),
+        "test333" => integer_to_list(rand:uniform(1000))
+    },
+    erlcat:log_heartbeat("titleh1",Data),
+    ok.
