@@ -34,7 +34,7 @@ sleep1()->
 
 
 heart()->
-	erlcat:init_cat("testapp",#cat_config{}),
+	erlcat:init_cat("testapp",#cat_config{enable_heartbeat=1,enable_debugLog=1}),
     Data = #{
         "userinfo" => integer_to_list(rand:uniform(1000)),
         "test22" => integer_to_list(rand:uniform(1000)),

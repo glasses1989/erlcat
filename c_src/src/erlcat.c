@@ -9,9 +9,12 @@
 
 #include "../include/client.h"
 #include "erl_nif.h"
-
+#include "lib/cat_ezxml.h"
+#include "ccat/message_manager.h"
 #define MAXKEYLEN 128
 #define MAXVALLEN 1024
+
+extern CatMessageManager g_cat_messageManager;
 
 static ErlNifResourceType* cattrans_res;
 
@@ -456,34 +459,19 @@ ERL_NIF_TERM logHeartbeatOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
     ErlNifMapIterator iter;
     char hbKeyName[MAXKEYLEN];
     char hbValue[MAXKEYLEN];
-
+    
     (void)memset(&heartCategory, '\0', sizeof(heartCategory));
 
 
 	if (enif_get_string(env, argv[0], heartCategory, sizeof(heartCategory), ERL_NIF_LATIN1) < 1) {
         return enif_make_badarg(env);
     }
-    keyTail=argv[1];
-    while(enif_get_list_cell(env,keyTail,&keyHead,&keyTail)){
-		if(!enif_get_map_value(env,argv[2],keyHead,&mapValue)){
-			return enif_make_badarg(env);
-		}
-		if(!enif_get_int(env,mapValue,&hbValue)){
-			return enif_make_badarg(env);
-		}
-
-    }
-
+    
 	ezxml_t xml = ezxml_new_d("status");
 	ezxml_t ext = ezxml_add_child_d(xml, "extension", 0);
 	ezxml_set_attr_d(ext, "id", heartCategory);
-	ezxml_t desc = ezxml_add_child_d(ext, "description", 0);
-	char categoryDesc[MAXKEYLEN];
-	strcpy(categoryDesc,"<![CDATA[");
-	strcat(categoryDesc,heartCategory);
-	strcat(categoryDesc,"]]>");
-	ezxml_set_txt_d(desc, categoryDesc);
-	int count = 1;
+	
+    int count = 1;
     enif_map_iterator_create(env, argv[1],&iter,ERL_NIF_MAP_ITERATOR_FIRST);
     while (enif_map_iterator_get_pair(env, &iter, &key, &value)) {
     	(void)memset(&hbKeyName, '\0', sizeof(hbKeyName));
@@ -491,7 +479,7 @@ ERL_NIF_TERM logHeartbeatOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
     	if(enif_get_string(env,key,hbKeyName,sizeof(hbKeyName),ERL_NIF_LATIN1)<1){
 			goto badarg;
     	}
-    	if(enif_get_string(env,key,hbValue,sizeof(hbValue),ERL_NIF_LATIN1)<1){
+    	if(enif_get_string(env,value,hbValue,sizeof(hbValue),ERL_NIF_LATIN1)<1){
 			goto badarg;
 		}
         ezxml_t detail = ezxml_add_child_d(ext, "extensionDetail", count);
@@ -504,6 +492,7 @@ ERL_NIF_TERM logHeartbeatOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 
     char *xmlContent = ezxml_toxml(xml);
     ezxml_free(xml);
+    
     CatHeartBeat *h = newHeartBeat("Heartbeat", g_cat_messageManager.ip);
 	h->addData(h, xmlContent);
 	free(xmlContent);
