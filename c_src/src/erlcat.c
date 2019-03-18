@@ -505,11 +505,16 @@ ERL_NIF_TERM logHeartbeatOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 
     char *xmlContent = ezxml_toxml(xml);
     ezxml_free(xml);
-    
+
+    CatTransaction *hbt = newTransaction("System", "CusStatus");
+
     CatHeartBeat *h = newHeartBeat("Heartbeat", g_cat_messageManager.ip);
 	h->addData(h, xmlContent);
 	free(xmlContent);
 	h->complete(h);
+
+    hbt->setStatus(hbt, CAT_SUCCESS);
+    hbt->complete(hbt);
 
     return make_atom(env, "ok");
 badarg:
