@@ -457,6 +457,7 @@ ERL_NIF_TERM logHeartbeatOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
     char heartCategory[MAXKEYLEN];
     ERL_NIF_TERM key, value;
     ErlNifMapIterator iter;
+    int xmlIndex=0;
     char hbKeyName[MAXKEYLEN];
     char hbValue[MAXKEYLEN];
     
@@ -468,9 +469,21 @@ ERL_NIF_TERM logHeartbeatOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
     }
     
 	ezxml_t xml = ezxml_new_d("status");
-	ezxml_t ext = ezxml_add_child_d(xml, "extension", 0);
+
+	ezxml_t runtime = ezxml_add_child_d(xml, "runtime", xmlIndex);
+	ezxml_t runtimeClassPath = ezxml_add_child_d(runtime, "java-classpath", 0);
+	ezxml_set_txt(runtimeClassPath,"newversion");
+	xmlIndex++;
+
+	ezxml_t message = ezxml_add_child_d(xml, "message", xmlIndex);
+	ezxml_set_attr_d(message, "produced", "0");
+	ezxml_set_attr_d(message, "overflowed", "0");
+	ezxml_set_attr_d(message, "bytes", "0");
+	xmlIndex++;
+
+	ezxml_t ext = ezxml_add_child_d(xml, "extension", xmlIndex);
 	ezxml_set_attr_d(ext, "id", heartCategory);
-	
+
     int count = 1;
     enif_map_iterator_create(env, argv[1],&iter,ERL_NIF_MAP_ITERATOR_FIRST);
     while (enif_map_iterator_get_pair(env, &iter, &key, &value)) {
