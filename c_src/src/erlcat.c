@@ -9,9 +9,12 @@
 
 #include "../include/client.h"
 #include "erl_nif.h"
-
+#include "lib/cat_ezxml.h"
+#include "ccat/message_manager.h"
 #define MAXKEYLEN 128
 #define MAXVALLEN 1024
+
+extern CatMessageManager g_cat_messageManager;
 
 static ErlNifResourceType* cattrans_res;
 
@@ -32,19 +35,29 @@ static ERL_NIF_TERM make_atom(ErlNifEnv *env, const char *atom_name) {
 // 初始化cat实例.
 ERL_NIF_TERM initCatClient(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     char appKey[MAXKEYLEN];
+    CatClientConfig config = DEFAULT_CCAT_CONFIG;
+
     (void)memset(&appKey, '\0', sizeof(appKey));
     
     if (enif_get_string(env, argv[0], appKey, sizeof(appKey), ERL_NIF_LATIN1) < 1) {
         return enif_make_badarg(env);
     }
-    
-    CatClientConfig config = DEFAULT_CCAT_CONFIG;
-    // 不能设置为字符编码类型.
-    config.encoderType = 0;
-    config.enableHeartbeat = 1;
-    config.enableSampling = 0;
-    config.enableMultiprocessing = 0;
-    config.enableDebugLog = 0;
+
+    if (!enif_get_int(env, argv[1], &config.encoderType)) {
+            return enif_make_badarg(env);
+    }
+    if (!enif_get_int(env, argv[2], &config.enableHeartbeat)) {
+                return enif_make_badarg(env);
+    }
+    if (!enif_get_int(env, argv[3], &config.enableSampling)) {
+                return enif_make_badarg(env);
+    }
+    if (!enif_get_int(env, argv[4], &config.enableMultiprocessing)) {
+                return enif_make_badarg(env);
+    }
+    if (!enif_get_int(env, argv[5], &config.enableDebugLog)) {
+                return enif_make_badarg(env);
+    }
 
     return enif_make_int(env, catClientInitWithConfig(appKey, &config));
 }
@@ -429,11 +442,83 @@ ERL_NIF_TERM setMessageTreeParentIdOfErlang(ErlNifEnv* env, int argc, const ERL_
 //Resource Load.
 
 static void transaction_destruct(ErlNifEnv* env, void *obj) {
-    transaction_t *trans_t = (transaction_t*)obj;
-    free(trans_t->_trans);
-    free(trans_t);
-    enif_release_resource(obj);
+//    transaction_t *trans_t = (transaction_t*)obj;
+//    free(trans_t->_trans);
+//    free(trans_t);
+//    enif_release_resource(obj);
 }
+
+// 设置本地messageTreeId.
+ERL_NIF_TERM logHeartbeatOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    char heartCategory[MAXKEYLEN];
+    ERL_NIF_TERM key, value;
+    ErlNifMapIterator iter;
+    int xmlIndex=0;
+    char hbKeyName[MAXKEYLEN];
+    char hbValue[MAXKEYLEN];
+    
+    (void)memset(&heartCategory, '\0', sizeof(heartCategory));
+
+
+	if (enif_get_string(env, argv[0], heartCategory, sizeof(heartCategory), ERL_NIF_LATIN1) < 1) {
+        return enif_make_badarg(env);
+    }
+    
+	ezxml_t xml = ezxml_new_d("status");
+
+	ezxml_t runtime = ezxml_add_child_d(xml, "runtime", xmlIndex);
+	ezxml_t runtimeClassPath = ezxml_add_child_d(runtime, "java-classpath", 0);
+	ezxml_set_txt(runtimeClassPath,"newversion");
+	xmlIndex++;
+
+	ezxml_t message = ezxml_add_child_d(xml, "message", xmlIndex);
+	ezxml_set_attr_d(message, "produced", "0");
+	ezxml_set_attr_d(message, "overflowed", "0");
+	ezxml_set_attr_d(message, "bytes", "0");
+	xmlIndex++;
+
+	ezxml_t ext = ezxml_add_child_d(xml, "extension", xmlIndex);
+	ezxml_set_attr_d(ext, "id", heartCategory);
+
+    int count = 1;
+    enif_map_iterator_create(env, argv[1],&iter,ERL_NIF_MAP_ITERATOR_FIRST);
+    while (enif_map_iterator_get_pair(env, &iter, &key, &value)) {
+    	(void)memset(&hbKeyName, '\0', sizeof(hbKeyName));
+    	(void)memset(&hbValue, '\0', sizeof(hbKeyName));
+    	if(enif_get_string(env,key,hbKeyName,sizeof(hbKeyName),ERL_NIF_LATIN1)<1){
+			goto badarg;
+    	}
+    	if(enif_get_string(env,value,hbValue,sizeof(hbValue),ERL_NIF_LATIN1)<1){
+			goto badarg;
+		}
+        ezxml_t detail = ezxml_add_child_d(ext, "extensionDetail", count);
+		ezxml_set_attr_d(detail, "id", hbKeyName);
+		ezxml_set_attr_d(detail, "value", hbValue);
+		count++;
+        enif_map_iterator_next(env, &iter);
+    }
+    enif_map_iterator_destroy(env, &iter);
+
+    char *xmlContent = ezxml_toxml(xml);
+    ezxml_free(xml);
+
+    CatTransaction *hbt = newTransaction("System", "CusStatus");
+
+    CatHeartBeat *h = newHeartBeat("Heartbeat", g_cat_messageManager.ip);
+	h->addData(h, xmlContent);
+	free(xmlContent);
+	h->complete(h);
+
+    hbt->setStatus(hbt, CAT_SUCCESS);
+    hbt->complete(hbt);
+
+    return make_atom(env, "ok");
+badarg:
+	enif_map_iterator_destroy(env, &iter);
+	ezxml_free(xml);
+	return enif_make_badarg(env);
+}
+
 
 static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
     if (!cattrans_res) {
@@ -446,7 +531,7 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info) {
 }
 
 static ErlNifFunc nif_funcs[] = {
-    {"init_cat", 1, initCatClient},
+    {"init_cat", 6, initCatClient},
     
     {"get_cat_version", 0, getCatVersion},
     {"is_cat_enabled", 0, isCatEnabledOfErlang},
@@ -476,7 +561,9 @@ static ErlNifFunc nif_funcs[] = {
     {"get_message_tree_parent_id", 0, getMessageTreeParentIdOfErlang},
     {"set_message_tree_id", 1, setMessageTreeIdOfErlang},
     {"set_message_tree_root_id", 1, setMessageTreeRootIdOfErlang},
-    {"set_message_tree_parent_id", 1, setMessageTreeParentIdOfErlang}
+    {"set_message_tree_parent_id", 1, setMessageTreeParentIdOfErlang},
+
+    {"log_heartbeat",2,logHeartbeatOfErlang}
 };
 
 ERL_NIF_INIT(erlcat, nif_funcs, &load, NULL, NULL, NULL);
