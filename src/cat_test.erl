@@ -1,12 +1,12 @@
 -module(cat_test).
 
 -include("erlcat.hrl").
--export([event/0,trans/0,heart/0]).
--export([init/0,trans_count/1,heart_count/1]).
+-export([event/0,trans/0,heart/0,init_context/0]).
+-export([init/0,trans_count/1,heart_count/1,mutil_trans/0]).
 
 
 init()->
-	erlcat:init_cat("testapp",#cat_config{enable_heartbeat=0,enable_debugLog=1,encoder_type=0}),
+	erlcat:init_cat("testapp",#cat_config{enable_heartbeat=0,enable_debugLog=1,encoder_type=1}),
 	ok.
 
 event()->
@@ -14,24 +14,52 @@ event()->
 	ok.
 
 trans()->
-	erlcat:cat_client_init("testapp",#cat_config{}),
-	send_trans(20),
+	erlcat:init_cat("testapp",#cat_config{enable_heartbeat=0,enable_debugLog=1,encoder_type=1}),
+    init_context(),
+	send_trans(2),
 	ok.
 
+init_context()->
+	Context = erlcat:new_context(),
+    io:format("init_context ~p~n",[Context]),
+    put(erlcat_process_context,Context).
+
+% cat_test:init(),cat_test:trans().
 send_trans(0)->
 	ok;
 send_trans(Index)->
-	T1 = erlcat:new_transaction("MSG.send", "send"),
+    ErlCatContext = get(erlcat_process_context),
+    io:format("contetxt ~p ~n",[ErlCatContext]),
+	T1 = erlcat:new_transaction(ErlCatContext,"MSG.send", "send"),
 	sleep1(),
-	T2 = erlcat:new_transaction("MSG.send", "check"),
+	T2 = erlcat:new_transaction(ErlCatContext,"MSG.send", "check"),
 	sleep1(),
-	erlcat:complete(T2),
-	T3 = erlcat:new_transaction("MSG.send", "del111111"),
+	erlcat:complete(ErlCatContext,T2),
+	T3 = erlcat:new_transaction(ErlCatContext,"MSG.send", "del111111"),
 	sleep1(),
-	erlcat:complete(T3),
-	erlcat:complete(T1),
+	erlcat:complete(ErlCatContext,T3),
+	erlcat:complete(ErlCatContext,T1),
 	io:format("send ~p~n",[Index]),
 	send_trans(Index-1).
+
+
+send_trans2(0)->
+    ok;
+send_trans2(Index)->
+    ErlCatContext = get(erlcat_process_context),
+    io:format("contetxt ~p ~n",[ErlCatContext]),
+    T1 = erlcat:new_transaction(ErlCatContext,"MSG.send", "tttt1"),
+    sleep1(),
+    T2 = erlcat:new_transaction(ErlCatContext,"MSG.send", "tttt1_check"),
+    sleep1(),
+    erlcat:complete(ErlCatContext,T2),
+    T3 = erlcat:new_transaction(ErlCatContext,"MSG.send", "tttt1_del"),
+    sleep1(),
+    erlcat:complete(ErlCatContext,T3),
+    erlcat:complete(ErlCatContext,T1),
+    io:format("send2 ~p~n",[Index]),
+    send_trans2(Index-1).
+
 
 sleep1()->
 
@@ -61,3 +89,15 @@ trans_count(Count)->
 
 trans_with_due()->
 	erlcat:log_transaction_with_duration("TEST","testDuration",rand:uniform(200)).
+
+
+mutil_trans()->
+    erlcat:init_cat("testapp",#cat_config{enable_heartbeat=0,enable_debugLog=1,encoder_type=1}),
+    spawn(fun()->
+        init_context(),
+        send_trans(100)
+        end),
+    spawn(fun()->
+        init_context(),
+        send_trans2(100)
+          end).

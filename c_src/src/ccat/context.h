@@ -45,4 +45,6 @@ CatContext *getCatContext();
 
 CatMessageTree *getContextMessageTree();
 
+CatContext *newCatContext();
+
 #endif //CAT_CLIENT_C_CONTEXT_H
