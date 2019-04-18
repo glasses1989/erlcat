@@ -8,6 +8,7 @@
 -export([create_message_id/1, create_remote_message_id/2, get_message_tree_id/1, get_message_tree_root_id/1, get_message_tree_parent_id/1]).
 -export([set_message_tree_id/2, set_message_tree_root_id/2, set_message_tree_parent_id/2]).
 -export([log_heartbeat/3]).
+-export([log_remote_call_client/1,log_remote_call_server/4]).
 
 -on_load(init/0).
 
@@ -127,4 +128,9 @@ set_message_tree_parent_id(_ErlCatContext,_MessageId) ->
     ?NOT_LOADED.
 
 log_heartbeat(_ErlCatContext,_HeartbeatCatetory,_HeartMap)->
-        ?NOT_LOADED.
+    ?NOT_LOADED.
+
+log_remote_call_client(_ErlCatContext)->
+    ?NOT_LOADED.
+log_remote_call_server(_ErlCatContext,_RootId,_ParentId,_ChildId)->
+    ?NOT_LOADED.
