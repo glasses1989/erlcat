@@ -18,6 +18,13 @@ setup() ->
     erlcat:init_cat("testapp", #cat_config{enable_heartbeat = 0, enable_debugLog = 1, encoder_type = 1}),
     ok.
 
+
+remote_call_client_test()->
+    setup(),
+    Content = erlcat:new_context(),
+    erlcat:log_remote_call_client(Content),
+    ok.
+
 transaction_test_() ->
     {
         setup,

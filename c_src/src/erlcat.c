@@ -13,6 +13,7 @@
 
 #include "ccat/message_manager.h"
 #include "ccat/context.h"
+#include "ccat/message_id.h"
 
 #include <lib/cat_clog.h>
 #include <lib/cat_thread.h>
@@ -614,7 +615,7 @@ ERL_NIF_TERM logRemoteCallClientOfErlang(ErlNifEnv* env, int argc, const ERL_NIF
 	}
 	switchCatContext(env,argv[0]);
 
-	char messageId = getThreadLocalMessageTreeId();
+	char *messageId = getThreadLocalMessageTreeId();
 	if(messageId == NULL){
 		messageId = createMessageId();
 		setThreadLocalMessageTreeId(messageId);
@@ -630,7 +631,7 @@ ERL_NIF_TERM logRemoteCallClientOfErlang(ErlNifEnv* env, int argc, const ERL_NIF
 	ERL_NIF_TERM rootIdTerm = enif_make_string(env,rootId,ERL_NIF_LATIN1);
 	ERL_NIF_TERM childIdTerm = enif_make_string(env,childId,ERL_NIF_LATIN1);
 	if(childId != NULL){
-		free(childId);
+		catsdsfree(childId);
 	}
 	return enif_make_tuple3(env,rootIdTerm,messageIdTerm,childIdTerm);
 

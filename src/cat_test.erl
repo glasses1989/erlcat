@@ -2,7 +2,7 @@
 
 -include("erlcat.hrl").
 -export([event/0,trans/0,heart/0,init_context/0]).
--export([init/0,trans_count/1,heart_count/1,mutil_trans/0]).
+-export([init/0,trans_count/1,heart_count/1,mutil_trans/0,l1/0]).
 
 
 init()->
@@ -101,3 +101,12 @@ mutil_trans()->
         init_context(),
         send_trans2(100)
           end).
+
+
+l1()->
+    erlcat:init_cat("testapp",#cat_config{enable_heartbeat=0,enable_debugLog=1,encoder_type=1}),
+    Content = erlcat:new_context(),
+    {R,P,C}= erlcat:log_remote_call_client(Content),
+    io:format("get message tree id ~p ~p ~p ~n",[R,P,C]),
+    erlcat:log_remote_call_server(Content,R,P,C),
+    ok.
