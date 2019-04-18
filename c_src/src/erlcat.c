@@ -620,8 +620,8 @@ ERL_NIF_TERM logRemoteCallClientOfErlang(ErlNifEnv* env, int argc, const ERL_NIF
 		setThreadLocalMessageTreeId(messageId);
 	}
 
-	char *rootid = getThreadLocalMessageTreeRootId();
-	if(rootid == NULL){
+	char *rootId = getThreadLocalMessageTreeRootId();
+	if(rootId == NULL){
 		rootId = messageId;
 	}
 	char *childId = createMessageId();
@@ -630,7 +630,7 @@ ERL_NIF_TERM logRemoteCallClientOfErlang(ErlNifEnv* env, int argc, const ERL_NIF
 	ERL_NIF_TERM rootIdTerm = enif_make_string(env,rootId,ERL_NIF_LATIN1);
 	ERL_NIF_TERM childIdTerm = enif_make_string(env,childId,ERL_NIF_LATIN1);
 	if(childId != NULL){
-		free(childId)
+		free(childId);
 	}
 	return enif_make_tuple3(env,rootIdTerm,messageIdTerm,childIdTerm);
 
