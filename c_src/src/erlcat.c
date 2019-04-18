@@ -615,16 +615,17 @@ ERL_NIF_TERM logRemoteCallClientOfErlang(ErlNifEnv* env, int argc, const ERL_NIF
 	}
 	switchCatContext(env,argv[0]);
 
-	char *messageId = getThreadLocalMessageTreeId();
-	if(messageId == NULL){
-		messageId = createMessageId();
+//	char *messageId = getThreadLocalMessageTreeId();
+//	if(messageId == NULL){
+		char *messageId = createMessageId();
 		setThreadLocalMessageTreeId(messageId);
-	}
+//	}
 
-	char *rootId = getThreadLocalMessageTreeRootId();
-	if(rootId == NULL){
-		rootId = messageId;
-	}
+//	char *rootId = getThreadLocalMessageTreeRootId();
+//	if(rootId == NULL){
+		char *rootId = messageId;
+		setThreadLocalMessageTreeRootId(rootId);
+//	}
 	char *childId = createMessageId();
 
 	ERL_NIF_TERM messageIdTerm = enif_make_string(env,messageId,ERL_NIF_LATIN1);
@@ -665,7 +666,16 @@ ERL_NIF_TERM logRemoteCallServerOfErlang(ErlNifEnv* env, int argc, const ERL_NIF
 	setThreadLocalMessageTreeParentId(parentId);
 	setThreadLocalMessageTreeId(childId);
 
-	return make_atom(env, "ok");
+	char *nextChildId = createMessageId();
+
+	ERL_NIF_TERM messageIdTerm = enif_make_string(env,childId,ERL_NIF_LATIN1);
+	ERL_NIF_TERM rootIdTerm = enif_make_string(env,rootId,ERL_NIF_LATIN1);
+	ERL_NIF_TERM nextChildIdTerm = enif_make_string(env,nextChildId,ERL_NIF_LATIN1);
+	if(nextChildId != NULL){
+		catsdsfree(nextChildId);
+	}
+	return enif_make_tuple3(env,rootIdTerm,messageIdTerm,nextChildIdTerm);
+
 
 }
 
