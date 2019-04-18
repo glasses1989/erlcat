@@ -608,6 +608,65 @@ ERL_NIF_TERM setMessageTreeParentIdOfErlang(ErlNifEnv* env, int argc, const ERL_
     return make_atom(env, "ok");
 }
 
+ERL_NIF_TERM logRemoteCallClientOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]){
+	if(argc<1){
+    	return enif_make_badarg(env);
+	}
+	switchCatContext(env,argv[0]);
+
+	char messageId = getThreadLocalMessageTreeId();
+	if(messageId == NULL){
+		messageId = createMessageId();
+		setThreadLocalMessageTreeId(messageId);
+	}
+
+	char *rootid = getThreadLocalMessageTreeRootId();
+	if(rootid == NULL){
+		rootId = messageId;
+	}
+	char *childId = createMessageId();
+
+	ERL_NIF_TERM messageIdTerm = enif_make_string(env,messageId,ERL_NIF_LATIN1);
+	ERL_NIF_TERM rootIdTerm = enif_make_string(env,rootId,ERL_NIF_LATIN1);
+	ERL_NIF_TERM childIdTerm = enif_make_string(env,childId,ERL_NIF_LATIN1);
+	if(childId != NULL){
+		free(childId)
+	}
+	return enif_make_tuple3(env,rootIdTerm,messageIdTerm,childIdTerm);
+
+}
+
+ERL_NIF_TERM logRemoteCallServerOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]){
+	if(argc<4){
+    	return enif_make_badarg(env);
+	}
+	switchCatContext(env,argv[0]);
+
+
+	char rootId[MAXKEYLEN];
+	char parentId[MAXKEYLEN];
+	char childId[MAXKEYLEN];
+
+	(void)memset(&rootId, '\0', sizeof(rootId));
+	(void)memset(&parentId, '\0', sizeof(parentId));
+	(void)memset(&childId, '\0', sizeof(childId));
+	if (enif_get_string(env, argv[1], rootId, sizeof(rootId), ERL_NIF_LATIN1) < 1) {
+		return enif_make_badarg(env);
+	}
+	if (enif_get_string(env, argv[2], parentId, sizeof(parentId), ERL_NIF_LATIN1) < 1) {
+    		return enif_make_badarg(env);
+	}
+	if (enif_get_string(env, argv[3], childId, sizeof(childId), ERL_NIF_LATIN1) < 1) {
+			return enif_make_badarg(env);
+	}
+
+	setThreadLocalMessageTreeRootId(rootId);
+	setThreadLocalMessageTreeParentId(parentId);
+	setThreadLocalMessageTreeId(childId);
+
+	return make_atom(env, "ok");
+
+}
 
 ERL_NIF_TERM logHeartbeatOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     if(argc<3){
@@ -768,7 +827,10 @@ static ErlNifFunc nif_funcs[] = {
     {"set_message_tree_root_id", 2, setMessageTreeRootIdOfErlang},
     {"set_message_tree_parent_id", 2, setMessageTreeParentIdOfErlang},
 
-    {"log_heartbeat",3,logHeartbeatOfErlang}
+    {"log_heartbeat",3,logHeartbeatOfErlang},
+
+    {"log_remote_call_client",1,logRemoteCallClientOfErlang},
+    {"log_remote_call_server",4,logRemoteCallServerOfErlang}
 };
 
 ERL_NIF_INIT(erlcat, nif_funcs, &load, NULL, NULL, NULL);
