@@ -1,8 +1,8 @@
 # erlcat
-Erlang cat client
+erlang cat client
 
 ## Feature
-Full cat client api 
+whole cat client api 
 
 ## Usage
 
