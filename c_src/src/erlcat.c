@@ -450,25 +450,25 @@ static void transaction_destruct(ErlNifEnv* env, void *obj) {
 
 // 设置本地messageTreeId.
 ERL_NIF_TERM logHeartbeatOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-    char heartCategory[MAXKEYLEN];
+//    char heartCategory[MAXKEYLEN];
     ERL_NIF_TERM key, value;
     ErlNifMapIterator iter;
     int xmlIndex=0;
     char hbKeyName[MAXKEYLEN];
     char hbValue[MAXKEYLEN];
     
-    (void)memset(&heartCategory, '\0', sizeof(heartCategory));
-
-
-	if (enif_get_string(env, argv[0], heartCategory, sizeof(heartCategory), ERL_NIF_LATIN1) < 1) {
-        return enif_make_badarg(env);
-    }
-    
+//    (void)memset(&heartCategory, '\0', sizeof(heartCategory));
+//
+//
+//	if (enif_get_string(env, argv[0], heartCategory, sizeof(heartCategory), ERL_NIF_LATIN1) < 1) {
+//        return enif_make_badarg(env);
+//    }
+//
 	ezxml_t xml = ezxml_new_d("status");
 
 	ezxml_t runtime = ezxml_add_child_d(xml, "runtime", xmlIndex);
 	ezxml_t runtimeClassPath = ezxml_add_child_d(runtime, "java-classpath", 0);
-	ezxml_set_txt(runtimeClassPath,"newversion");
+	ezxml_set_txt(runtimeClassPath,"erl_heartbeat");
 	xmlIndex++;
 
 	ezxml_t message = ezxml_add_child_d(xml, "message", xmlIndex);
@@ -477,32 +477,71 @@ ERL_NIF_TERM logHeartbeatOfErlang(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 	ezxml_set_attr_d(message, "bytes", "0");
 	xmlIndex++;
 
-	ezxml_t ext = ezxml_add_child_d(xml, "extension", xmlIndex);
-	ezxml_set_attr_d(ext, "id", heartCategory);
+	//add extension
+	ErlNifMapIterator extensionIter;
+	ERL_NIF_TERM extensionKey, extensionValue;
+	char extensionName[MAXKEYLEN];
+	enif_map_iterator_create(env, argv[0],&extensionIter,ERL_NIF_MAP_ITERATOR_FIRST);
+	while (enif_map_iterator_get_pair(env, &extensionIter, &extensionKey, &extensionValue)) {
+	    ezxml_t ext = ezxml_add_child_d(xml, "extension", xmlIndex);
+	    xmlIndex++;
+	    (void)memset(&extensionName, '\0', sizeof(extensionName));
+	    if(enif_get_string(env,extensionKey,extensionName,sizeof(extensionName),ERL_NIF_LATIN1)<1){
+            goto badarg;
+        }
+        ezxml_set_attr_d(ext, "id", extensionName);
 
-    int count = 1;
-    enif_map_iterator_create(env, argv[1],&iter,ERL_NIF_MAP_ITERATOR_FIRST);
-    while (enif_map_iterator_get_pair(env, &iter, &key, &value)) {
-    	(void)memset(&hbKeyName, '\0', sizeof(hbKeyName));
-    	(void)memset(&hbValue, '\0', sizeof(hbKeyName));
-    	if(enif_get_string(env,key,hbKeyName,sizeof(hbKeyName),ERL_NIF_LATIN1)<1){
-			goto badarg;
-    	}
-    	if(enif_get_string(env,value,hbValue,sizeof(hbValue),ERL_NIF_LATIN1)<1){
-			goto badarg;
-		}
-        ezxml_t detail = ezxml_add_child_d(ext, "extensionDetail", count);
-		ezxml_set_attr_d(detail, "id", hbKeyName);
-		ezxml_set_attr_d(detail, "value", hbValue);
-		count++;
-        enif_map_iterator_next(env, &iter);
-    }
-    enif_map_iterator_destroy(env, &iter);
+        //add detail
+        int count = 1;
+        enif_map_iterator_create(env, extensionValue,&iter,ERL_NIF_MAP_ITERATOR_FIRST);
+        while (enif_map_iterator_get_pair(env, &iter, &key, &value)) {
+            (void)memset(&hbKeyName, '\0', sizeof(hbKeyName));
+            (void)memset(&hbValue, '\0', sizeof(hbKeyName));
+            if(enif_get_string(env,key,hbKeyName,sizeof(hbKeyName),ERL_NIF_LATIN1)<1){
+                goto badarg;
+            }
+            if(enif_get_string(env,value,hbValue,sizeof(hbValue),ERL_NIF_LATIN1)<1){
+                goto badarg;
+            }
+            ezxml_t detail = ezxml_add_child_d(ext, "extensionDetail", count);
+            ezxml_set_attr_d(detail, "id", hbKeyName);
+            ezxml_set_attr_d(detail, "value", hbValue);
+            count++;
+            enif_map_iterator_next(env, &iter);
+        }
+        enif_map_iterator_destroy(env, &iter);
+
+        enif_map_iterator_next(env, &extensionIter);
+	}
+	enif_map_iterator_destroy(env, &extensionIter);
+
+//
+//	ezxml_t ext = ezxml_add_child_d(xml, "extension", xmlIndex);
+//	ezxml_set_attr_d(ext, "id", heartCategory);
+//
+//    int count = 1;
+//    enif_map_iterator_create(env, argv[1],&iter,ERL_NIF_MAP_ITERATOR_FIRST);
+//    while (enif_map_iterator_get_pair(env, &iter, &key, &value)) {
+//    	(void)memset(&hbKeyName, '\0', sizeof(hbKeyName));
+//    	(void)memset(&hbValue, '\0', sizeof(hbKeyName));
+//    	if(enif_get_string(env,key,hbKeyName,sizeof(hbKeyName),ERL_NIF_LATIN1)<1){
+//			goto badarg;
+//    	}
+//    	if(enif_get_string(env,value,hbValue,sizeof(hbValue),ERL_NIF_LATIN1)<1){
+//			goto badarg;
+//		}
+//        ezxml_t detail = ezxml_add_child_d(ext, "extensionDetail", count);
+//		ezxml_set_attr_d(detail, "id", hbKeyName);
+//		ezxml_set_attr_d(detail, "value", hbValue);
+//		count++;
+//        enif_map_iterator_next(env, &iter);
+//    }
+//    enif_map_iterator_destroy(env, &iter);
 
     char *xmlContent = ezxml_toxml(xml);
     ezxml_free(xml);
 
-    CatTransaction *hbt = newTransaction("System", "CusStatus");
+    CatTransaction *hbt = newTransaction("System", "ErlStatus");
 
     CatHeartBeat *h = newHeartBeat("Heartbeat", g_cat_messageManager.ip);
 	h->addData(h, xmlContent);
