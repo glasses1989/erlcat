@@ -602,7 +602,7 @@ static ErlNifFunc nif_funcs[] = {
     {"set_message_tree_root_id", 1, setMessageTreeRootIdOfErlang},
     {"set_message_tree_parent_id", 1, setMessageTreeParentIdOfErlang},
 
-    {"log_heartbeat",2,logHeartbeatOfErlang}
+    {"log_heartbeat",1,logHeartbeatOfErlang}
 };
 
 ERL_NIF_INIT(erlcat, nif_funcs, &load, NULL, NULL, NULL);
