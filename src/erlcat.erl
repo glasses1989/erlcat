@@ -7,7 +7,7 @@
 -export([new_transaction/2, set_status/2, set_timestamp/2, set_duration/2, set_duration_start/2, add_data/2, add_kv/3, complete/1]).
 -export([create_message_id/0, create_remote_message_id/1, get_message_tree_id/0, get_message_tree_root_id/0, get_message_tree_parent_id/0]).
 -export([set_message_tree_id/1, set_message_tree_root_id/1, set_message_tree_parent_id/1]).
--export([log_heartbeat/2]).
+-export([log_heartbeat/1]).
 
 -on_load(init/0).
 
@@ -123,5 +123,5 @@ set_message_tree_root_id(_MessageId) ->
 set_message_tree_parent_id(_MessageId) ->
     ?NOT_LOADED.
 
-log_heartbeat(HeartbeatCatetory,HeartMap)->
+log_heartbeat(_HeartMap)->
         ?NOT_LOADED.
