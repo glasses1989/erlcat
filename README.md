@@ -30,6 +30,7 @@ $ rebar3 compile
 然后你就可以通过下面的代码初始化erlang版的cat客户端了：
 
 ```erlang
+%% 采用默认配置
 erlcat:init_cat("appkey", #cat_config{})
 ```
 
@@ -90,7 +91,7 @@ erlcat:init_cat("appkey", #cat_config{enable_debugLog=1})
 解决多个进程共享上下文造成的事务等数据"混乱"的问题。
 
 ```erlang
-// 创建上下文对象，放入进程字典
+%% 创建上下文对象，放入进程字典
 ErlCatContext = erlcat:new_context(),
 put(erlcat_process_context, ErlCatContext).
 ```
@@ -100,7 +101,7 @@ put(erlcat_process_context, ErlCatContext).
 记录一个事件。
 
 ```erlang
-# 记录一个完整的事件
+%% 记录一个完整的事件
 erlcat:log_event(ErlCatContext, "Event", "E4", "0", "some debug info");
 ```
 
@@ -109,7 +110,7 @@ erlcat:log_event(ErlCatContext, "Event", "E4", "0", "some debug info");
 name可以通过第二个参数来复写，错误堆栈会被收集并存放在 data 属性中。
 
 ```erlang
-# 记录一个错误事件
+%% 记录一个错误事件
 erlcat:log_error(ErlCatContext, "failed", "error info");
 ```
 
@@ -122,11 +123,11 @@ metric每秒钟聚合指定指标（name）的数据。
 对于 `duration`，我们使用平均值来代替求和。
 
 ```erlang
-// 每秒求指标总和
+%% 每秒求指标总和
 erlcat:log_metric_for_count(ErlCatContext, "metric-1", 3),
-// 每秒求指标平均值
+%% 每秒求指标平均值
 erlcat:log_metric_for_duration(ErlCatContext, "metric-2", 3),
-// 每秒求指标总和，和log_metric_for_count方法效果一样
+%% 每秒求指标总和，和log_metric_for_count方法效果一样
 erlcat:log_metric_for_sum(ErlCatContext, "metric-3", 3),
 ```
 ### Transaction apis
