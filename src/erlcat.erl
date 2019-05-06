@@ -34,11 +34,17 @@ not_loaded(Line) ->
     erlang:nif_error({not_loaded, [{module, ?MODULE}, {line, Line}]}).
 
 %% === Common Apis ===
-init_cat(Appkey,CatConfile)->
-    #cat_config{encoder_type = EncodeType,enable_heartbeat = HeartBeat,enable_sampling =  Sampling,enable_multiprocessing =  Multiprocess,enable_debugLog = Debug}=CatConfile,
-    init_cat(Appkey,EncodeType,HeartBeat,Sampling,Multiprocess,Debug).
+init_cat(AppKey, CatConfig)->
+    #cat_config {
+        encoder_type = EncodeType,
+        enable_heartbeat = HeartBeat,
+        enable_sampling = Sampling,
+        enable_multiprocessing = MultiProcess,
+        enable_debugLog = Debug
+    } = CatConfig,
+    init_cat(AppKey, EncodeType, HeartBeat, Sampling, MultiProcess, Debug).
 
-init_cat(_AppKey,_EncodeType,_HeartBeat,_Sampling,_Multiprocess,_Debug) ->
+init_cat(_AppKey, _EncodeType, _HeartBeat, _Sampling, _MultiProcess, _Debug) ->
     ?NOT_LOADED.
 
 get_cat_version() ->
@@ -106,7 +112,7 @@ complete(_ErlCatContext,_CatTransaction)->
 create_message_id(_ErlCatContext) ->
     ?NOT_LOADED. 
 
-create_remote_message_id(_ErlCatContext,_AppKey) ->
+create_remote_message_id(_ErlCatContext, _AppKey) ->
     ?NOT_LOADED. 
 
 get_message_tree_id(_ErlCatContext) ->
@@ -118,19 +124,19 @@ get_message_tree_root_id(_ErlCatContext) ->
 get_message_tree_parent_id(_ErlCatContext) ->
     ?NOT_LOADED. 
 
-set_message_tree_id(_ErlCatContext,_MessageId) ->
+set_message_tree_id(_ErlCatContext, _MessageId) ->
     ?NOT_LOADED. 
 
-set_message_tree_root_id(_ErlCatContext,_MessageId) ->
+set_message_tree_root_id(_ErlCatContext, _MessageId) ->
     ?NOT_LOADED. 
 
-set_message_tree_parent_id(_ErlCatContext,_MessageId) ->
+set_message_tree_parent_id(_ErlCatContext, _MessageId) ->
     ?NOT_LOADED.
 
-log_heartbeat(_ErlCatContext,_HeartbeatCatetory,_HeartMap)->
+log_heartbeat(_ErlCatContext, _HeartbeatCategory, _HeartMap)->
     ?NOT_LOADED.
 
 log_remote_call_client(_ErlCatContext)->
     ?NOT_LOADED.
-log_remote_call_server(_ErlCatContext,_RootId,_ParentId,_ChildId)->
+log_remote_call_server(_ErlCatContext, _RootId,_ParentId, _ChildId)->
     ?NOT_LOADED.
